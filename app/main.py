@@ -5,6 +5,7 @@ from app.api.v1.api_v1 import router as api_v1_router
 from starlette.middleware.cors import CORSMiddleware
 import torch
 from app.core.minicpm.minicpm_v import MiniCPMVChat
+import opencc
 
 logger = logging.getLogger(__name__)
 
@@ -17,9 +18,11 @@ file_handler = logging.FileHandler("app.log")
 logger.addHandler(file_handler)
 
 chat_model = MiniCPMVChat("openbmb/MiniCPM-Llama3-V-2_5")
+opencc_converter = opencc.OpenCC("s2twp")
 
 import globals
 globals.chat_model = chat_model
+globals.opencc_converter = opencc_converter
 
 if os.getenv("PROD_MODE", "false") == 'true':
     logger.info("Run in prod mode")

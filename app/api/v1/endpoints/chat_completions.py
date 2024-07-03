@@ -11,7 +11,12 @@ router = APIRouter()
 
 import globals
 
-def format_openai_chunk(text: str, role: str = "assistant", finish_reason: Optional[str] = None) -> Dict[str, Any]:
+def format_openai_chunk(text: str, role: str = "assistant", finish_reason: Optional[str] = None, force_zhtw: bool = False) -> Dict[str, Any]:
+
+    if force_zhtw:
+        opencc_converter = globals.opencc_converter
+        text = opencc_converter.convert(text)
+
     return {
         "choices": [
             {
@@ -22,9 +27,9 @@ def format_openai_chunk(text: str, role: str = "assistant", finish_reason: Optio
         ]
     }
 
-def sse_format(generator):
+def sse_format(generator, force_zhtw: bool = False):
     for text in generator:
-        chunk = format_openai_chunk(text)
+        chunk = format_openai_chunk(text, force_zhtw=force_zhtw)
         yield f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n"
     
     end_chunk = format_openai_chunk("", finish_reason="stop")
@@ -35,6 +40,6 @@ async def chat_completions(request: ChatCompletionsRequest):
     answer = globals.chat_model.chat(request)
 
     if (request.stream):
-        return StreamingResponse(sse_format(answer), media_type="text/event-stream")
+        return StreamingResponse(sse_format(answer, request.force_zhtw), media_type="text/event-stream")
     else:
         return answer

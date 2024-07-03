@@ -1,6 +1,7 @@
 fastapi[all]
 gunicorn
 uvicorn
+opencc-python-reimplemented
 
 packaging==23.2
 addict==2.4.0
