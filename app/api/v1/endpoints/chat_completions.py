@@ -2,9 +2,9 @@ from typing import Dict, Any, Optional
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 import logging
-from transformers import AutoModel
 from app.api.v1.models.chat_completions import ChatCompletionsRequest
 import json
+import time
 
 logger = logging.getLogger()
 router = APIRouter()
@@ -42,4 +42,30 @@ async def chat_completions(request: ChatCompletionsRequest):
     if (request.stream):
         return StreamingResponse(sse_format(answer, request.force_zhtw), media_type="text/event-stream")
     else:
-        return answer
+        # Non-streaming mode: Convert the string answer to the OpenAI format
+        completion_tokens = len(globals.chat_model.model.tokenizer.encode(answer))
+        if request.force_zhtw:
+            answer = globals.opencc_converter.convert(answer)
+        formatted_answer = {
+            "id": "example-id",  # You can generate a unique ID here
+            "object": "chat.completion",
+            "created": int(time.time()),
+            "model": "minicpm-v",
+            "choices": [
+                {
+                    "message": {
+                        "role": "assistant",
+                        "content": answer
+                    },
+                    "index": 0,
+                    "finish_reason": "stop"
+                }
+            ],
+            "usage": {
+                "prompt_tokens": 0,
+                "completion_tokens": completion_tokens,
+                "total_tokens": completion_tokens
+            }
+        }
+        return formatted_answer
+
