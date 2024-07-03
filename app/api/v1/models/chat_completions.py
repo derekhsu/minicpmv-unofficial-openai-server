@@ -1,4 +1,5 @@
 from typing import Any, List, Literal, Text, Optional, Union
+from click import Option
 from pydantic import BaseModel
 
 class ChatMessage(BaseModel):
@@ -6,7 +7,7 @@ class ChatMessage(BaseModel):
     content: Union[Text, List[Any]]
 
 class ChatCompletionsRequest(BaseModel):
-    messages: List[ChatMessage]    
+    messages: List[ChatMessage]
     temperature: Optional[float] = None
     top_p: Optional[float] = None
     top_k: Optional[int] = None
@@ -14,5 +15,6 @@ class ChatCompletionsRequest(BaseModel):
     stream: Optional[bool] = False
     stop: Optional[List[str]] = None
     repetition_penalty: Optional[float] = None
+    force_zhtw: bool = False
 
     
