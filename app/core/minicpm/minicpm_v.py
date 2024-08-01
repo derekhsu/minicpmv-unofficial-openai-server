@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import torch
 import json
 from PIL import Image
@@ -141,6 +142,11 @@ def img2base64(file_name):
     with open(file_name, 'rb') as f:
         encoded_string = base64.b64encode(f.read())
         return encoded_string
+    
+def _create_blank_image():
+    # Assuming a size of 224x224 with 448 channels, modify as needed
+    blank_image = Image.new('RGB', (100, 100), (255, 255, 255))  # White 100x100 image
+    return blank_image
 
 class MiniCPMV:
     def __init__(self, model_path) -> None:
@@ -177,8 +183,23 @@ class MiniCPMV2_5:
         #     image = Image.open(io.BytesIO(base64.b64decode(input.image))).convert('RGB')
         # except Exception as e:
         #     logger.error(f"Image decode error: {e}") 
+        logger.info(f"request: {input}")
+
         processed_messages = []
+        has_image_in_all_messages = False
+
+        # First pass to check if any image exists
         for message in input.messages:
+            if message.role == "user" and isinstance(message.content, list):
+                for item in message.content:
+                    if isinstance(item, dict) and item.get('type') == "image_url":
+                        has_image_in_all_messages = True
+                        break
+            if has_image_in_all_messages:
+                break
+        
+        logger.info(f"has_image_in_all_messages: {has_image_in_all_messages}")
+        for idx, message in enumerate(input.messages):
             if message.role == "user":
                 if isinstance(message.content, str):
                     processed_messages.append({"role": "user", "content": message.content})
@@ -199,6 +220,13 @@ class MiniCPMV2_5:
                     processed_messages.append({"role": "user", "content": processed_content})
             else:
                 processed_messages.append({"role": message.role, "content": message.content})
+
+        # If no image in all messages, add a blank image to the first user message
+        if not has_image_in_all_messages:
+            if isinstance(processed_messages[0]["content"], list):
+                processed_messages[0]["content"].append(_create_blank_image())
+            else:
+                processed_messages[0]["content"] = [processed_messages[0]["content"], _create_blank_image()]
 
         logger.info(f"processed_message: {processed_messages}")
         if processed_messages[0]['role'] == "system":
