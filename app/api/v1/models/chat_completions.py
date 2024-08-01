@@ -8,13 +8,13 @@ class ChatMessage(BaseModel):
 
 class ChatCompletionsRequest(BaseModel):
     messages: List[ChatMessage]
-    temperature: Optional[float] = None
-    top_p: Optional[float] = None
-    top_k: Optional[int] = None
-    max_tokens: Optional[int] = None
+    temperature: Optional[float] = 1.0
+    top_p: Optional[float] = 1.0
+    top_k: Optional[int] = 100
+    max_tokens: Optional[int] = 2048
     stream: Optional[bool] = False
     stop: Optional[List[str]] = None
-    repetition_penalty: Optional[float] = None
+    repetition_penalty: Optional[float] = 1.05
     force_zhtw: bool = False
 
     
