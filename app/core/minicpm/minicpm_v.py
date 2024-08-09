@@ -199,8 +199,11 @@ class MiniCPMV2_5:
                 break
         
         logger.info(f"has_image_in_all_messages: {has_image_in_all_messages}")
+        user_message_index = None
         for idx, message in enumerate(input.messages):
             if message.role == "user":
+                if user_message_index is None:
+                    user_message_index = idx
                 if isinstance(message.content, str):
                     processed_messages.append({"role": "user", "content": message.content})
                 elif isinstance(message.content, list):
@@ -222,11 +225,12 @@ class MiniCPMV2_5:
                 processed_messages.append({"role": message.role, "content": message.content})
 
         # If no image in all messages, add a blank image to the first user message
-        if not has_image_in_all_messages:
+        if not has_image_in_all_messages and user_message_index is not None:
+            blank_image = _create_blank_image()
             if isinstance(processed_messages[0]["content"], list):
-                processed_messages[0]["content"].append(_create_blank_image())
+                processed_messages[user_message_index]["content"].append(blank_image)
             else:
-                processed_messages[0]["content"] = [processed_messages[0]["content"], _create_blank_image()]
+                processed_messages[user_message_index]["content"] = [processed_messages[user_message_index]["content"], blank_image]
 
         logger.info(f"processed_message: {processed_messages}")
         if processed_messages[0]['role'] == "system":
