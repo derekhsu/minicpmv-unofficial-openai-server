@@ -12,6 +12,14 @@ This is an unofficial project providing an OpenAI compatibable Restful API serve
 2. In the root directory of the project, run `uvicorn app.main:app --port 5000 --host 0.0.0.0`.
 3. You can run this API using gunicorn or other similiar tools.
 
+#### Run behind proxy
+
+If your service runs behind a proxy, set the environment variable `ROOT_PATH` to the rewritten URL to display `/docs` and `/redoc` correctly, such as:
+
+```shell
+ROOT_PATH=/mllm uvicorn app.main:app --port 5000 --host 0.0.0.0
+```
+
 ### Call from LangChain OpenAI client
 
 ```python

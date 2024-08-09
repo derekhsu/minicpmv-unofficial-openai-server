@@ -24,12 +24,14 @@ import globals
 globals.chat_model = chat_model
 globals.opencc_converter = opencc_converter
 
+root_path = os.getenv("ROOT_PATH", "")
+
 if os.getenv("PROD_MODE", "false") == 'true':
     logger.info("Run in prod mode")
-    app = FastAPI(docs_url=None, redoc_url=None)
+    app = FastAPI(docs_url=None, redoc_url=None, root_path=root_path)
 else:
     logger.info("Run in dev mode")
-    app = FastAPI()
+    app = FastAPI(root_path=root_path)
 
 # CORS
 app.add_middleware(
