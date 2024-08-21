@@ -1,11 +1,13 @@
 import logging
 import os
-from fastapi import FastAPI
-from app.api.v1.api_v1 import router as api_v1_router
-from starlette.middleware.cors import CORSMiddleware
-import torch
-from app.core.minicpm.minicpm_v import MiniCPMVChat
+
 import opencc
+import torch
+from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
+
+from app.api.v1.api_v1 import router as api_v1_router
+from app.core.minicpm.minicpm_v import MiniCPMVChat
 
 logger = logging.getLogger(__name__)
 
@@ -17,16 +19,17 @@ logging.basicConfig(level=getattr(logging, log_level), format=log_format)
 file_handler = logging.FileHandler("app.log")
 logger.addHandler(file_handler)
 
-chat_model = MiniCPMVChat("openbmb/MiniCPM-Llama3-V-2_5")
+chat_model = MiniCPMVChat("openbmb/MiniCPM-V-2_6")
 opencc_converter = opencc.OpenCC("s2twp")
 
 import globals
+
 globals.chat_model = chat_model
 globals.opencc_converter = opencc_converter
 
 root_path = os.getenv("ROOT_PATH", "")
 
-if os.getenv("PROD_MODE", "false") == 'true':
+if os.getenv("PROD_MODE", "false") == "true":
     logger.info("Run in prod mode")
     app = FastAPI(docs_url=None, redoc_url=None, root_path=root_path)
 else:
